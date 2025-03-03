@@ -134,7 +134,7 @@ MySQL 서버 내에 존재하는 많은 쓰레드가 공유해서 사용
 
 InnoDB 스토리지 엔진이 데이터를 필요로 할 때, 데이터 페이지를 읽어 각 조각에 저장한다.
 
-![image.png](attachment:3988875e-9a90-4af9-ba78-457d4366acd6:image.png)
+<img width="340" alt="Image" src="https://github.com/user-attachments/assets/e7caf0f0-5c39-40ba-adbe-618455ad4a9d" />
 
 ### LRU 리스트
 
@@ -178,7 +178,7 @@ InnoDB 스토리지 엔진이 데이터를 필요로 할 때, 데이터 페이�
 
 ## ※ 격리 수준, MVCC 보충
 
-![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/61ae2243-abf3-4add-9287-918dcbd29f45/e72c2297-21d1-4c4e-a7db-7ec21cd1c8da/image.png)
+<img width="629" alt="스크린샷 2025-03-03 오후 1 48 30" src="https://github.com/user-attachments/assets/8c1e1171-8155-4d15-af51-c7e2ee3bc339" />
 
 여러 트랜잭션이 동시에 처리될 때, 특정 트랜잭션이 다른 트랜잭션에서 변경하거나 조회하는 데이터를 볼 수 있게 허용할지 여부를 결정하는 것 
 
@@ -199,7 +199,7 @@ InnoDB 스토리지 엔진이 데이터를 필요로 할 때, 데이터 페이�
 - 백업 레코드에는 어느 트랜잭션에 의해 백업 되었는지 트랜잭션 번호를 함께 저장한다.
 → 자신의 트랜잭션 번호보다 낮은 트랜잭션 번호에서 변경된 데이터만 볼 수 있음
 
-![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/61ae2243-abf3-4add-9287-918dcbd29f45/1af87e14-10b7-463c-af49-8c0f72034a14/image.png)
+<img width="674" alt="스크린샷 2025-03-03 오후 1 49 14" src="https://github.com/user-attachments/assets/3c647c92-c2cf-4ae9-8aa8-cf2395210ff8" />
 
 사용자 B가 select, B의 트랜잭션이 끝나지 않은 상태에서 A가 update, commit 했으나
 
@@ -209,7 +209,7 @@ Undo 영역에 백업된 모든 레코드는 해당 데이터가 불필요하다
 
 REPEATABLE READ는 MVCC를 통해 한 트랜잭션 내에서 동일한 결과를 보장하지만, 새로운 레코드가 추가되는 경우에 부정합이 생길 수 있다.
 
-![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/61ae2243-abf3-4add-9287-918dcbd29f45/5c9c27e6-a24e-407e-9602-48ac8fc3a548/image.png)
+![image.png]<img width="671" alt="스크린샷 2025-03-03 오후 1 49 39" src="https://github.com/user-attachments/assets/8b7ca7cc-1456-415f-a382-7ac05f5f8d1e" />
 
 → Phantom Read (MySQL을 제외한 RDBMS)
 
@@ -227,11 +227,9 @@ but MySQL은 특수한 gap lock 이 존재하기 때문에 id=50인 레코드만
 
 - 커밋된 데이터만 조회할 수 있다.
 
-![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/61ae2243-abf3-4add-9287-918dcbd29f45/03b95408-ec6c-447c-bd85-03f4d327addb/image.png)
-
 - Phantom Read, Non-Repeatable Read 문제 발생 가능
 
-![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/61ae2243-abf3-4add-9287-918dcbd29f45/c2d0c55a-72ec-413e-9bb1-beda32e48bab/image.png)
+<img width="668" alt="스크린샷 2025-03-03 오후 1 50 03" src="https://github.com/user-attachments/assets/573a84e8-163b-4c1f-9b8c-c458458d576f" />
 
 Non-Repeatable Read는 일반적인 경우에는 크게 문제가 되지 않지만, 
 하나의 트랜잭션에서 동일한 데이터를 여러 번 읽고 변경하는 작업이 금전적인 처리와 연결되면 문제가 생길 수 있다. 
@@ -243,7 +241,7 @@ Non-Repeatable Read는 일반적인 경우에는 크게 문제가 되지 않지�
 - 커밋하지 않은 데이터에도 접근할 수 있다.
 - 다른 트랜잭션의 작업이 커밋 또는 롤백되지 않아도 즉시 보이게 됨
 
-![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/61ae2243-abf3-4add-9287-918dcbd29f45/7cf901ce-5e1e-44b3-b65f-5a20fbdd438d/image.png)
+![image.png](https://prod-files-<img width="668" alt="스크린샷 2025-03-03 오후 1 50 23" src="https://github.com/user-attachments/assets/7f44b65f-1f98-4a51-845a-f2f2c067cc16" />
 
 Dirty Read: 어떤 트랜잭션의 작업이 완료되지 않았는데도 다른 트랜잭션에서 데이터를 볼 수 있는 부정합 문제
 
