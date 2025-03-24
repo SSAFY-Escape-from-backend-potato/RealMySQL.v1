@@ -92,7 +92,8 @@ InnoDB 스토리지 엔진은 MySQL에서 제공하는 lock과 별개로 스토�
 
 ### InnoDB 스토리지 엔진의 잠금
 
-![image.png](attachment:a025ee47-9533-464c-bf4f-9e6e62c47310:image.png)
+![image](https://github.com/user-attachments/assets/ef94c7ee-9bb8-4124-b469-784d0f4cbbfc)
+
 
 InnoDB 스토리지 엔진은 **레코드 기반의 lock**을 제공하며, lock 정보가 상당히 작은 공간으로 관리되기 때문에 레코드 락이 페이지 락 또는 테이블 락으로 레벨업 되는 경우 (**락 에스컬레이션**)는 없다.
 
@@ -147,7 +148,7 @@ MySQL 5.1부터는 레코드 잠금과 잠금 대기에 대한 조회가 가능�
 
 ## 5.4 MySQL의 격리 수준
 
-![image.png](attachment:a60c94bf-0e8d-4163-bf30-4403874eba8f:image.png)
+![image (1)](https://github.com/user-attachments/assets/8bde4067-23c3-4b9d-9222-58a31211206d)
 
 아래로 갈 수록 **격리 (고립) 수준**은 높아지고 **동시 처리 성능**은 떨어지는 것이 일반적이다.
 
