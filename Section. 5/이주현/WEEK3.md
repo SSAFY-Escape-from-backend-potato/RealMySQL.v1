@@ -136,7 +136,7 @@ MySQL에서 제공하는 잠금 중 가장 범위가 넓음.
 
 MyISAM 이나 MEMEORY 스토리지 엔진 사용 시 테이블에 데이터를 변경하는 쿼리가 실행될 때 발생.
 
-InnoDB는 레코드 기반 잠금이 있어 테이블 락은 발생하지 않음.
+InnoDB는 일반적인 DML에서 레코드/범위 락을 사용하지만 AUTO_INCREMENT, 명시적 LOCK TABLES, 메타데이터 변경 같은 상황에서는 테이블 락이 발생할 수 있다.
 
 ## 5.2.3 네임드 락
 
@@ -144,7 +144,7 @@ InnoDB는 레코드 기반 잠금이 있어 테이블 락은 발생하지 않음
 
 자주 사용되지 않음
 
-많은 레코드에 대해 복잡한 요건으로 레코드를 변경하는 트랜잭션에서 유용하게 사용할 수 있다.
+애플리케이션‑레벨 상호 배제(크론 잡 동시 실행 방지 등)에 사용됨.
 
 ## 5.2.4 메타데이터 락
 
@@ -170,9 +170,14 @@ InnoDB는 레코드 기반 잠금이 있어 테이블 락은 발생하지 않음
 
 ### 넥스트 키 락
 
-레코드 락 + 갭 락
-
-REPEATABLE READ 격리 수준, innodb_lock_unsafe_for_binlog 시스템 변수 비활성화 상태에서 사용됨.
+- **구성** : 레코드 락 + 바로 앞 **갭 락**  
+- **언제 걸리나?**  
+  - `SELECT … FOR UPDATE` / `FOR SHARE`(8.0.22 이전 `LOCK IN SHARE MODE`)  
+  - `UPDATE`·`DELETE`와 같은 **락킹 읽기**  
+  - 단, 검색 조건이 “유니크 인덱스 = 값”**이면 갭 락을 생략하고 **레코드 락만** 획득.
+- 격리 수준 : 비‑락킹 `SELECT`를 제외하면 모든 격리 수준에서 동작한다.
+  
+#### 예제
 
 ```sql
 -- 테이블 구조
@@ -198,6 +203,7 @@ INSERT INTO user VALUES (10, 'A'), (20, 'B'), (30, 'C');
 
 ```
 
+1. 유니크 검색
 ```sql
 -- 트랜잭션 1
 START TRANSACTION;
@@ -205,83 +211,18 @@ SELECT * FROM user WHERE id = 20 FOR UPDATE;
 
 ```
 
-위 쿼리는 (10, 20] 구간에 넥스트 키 락을 건다.
+획득 락 → 레코드 락(id = 20)
+허용 행위 → 다른 세션은 id = 15·25 삽입 모두 가능
 
-id = 25 삽입 가능
-
+2. 범위 검색
 ```sql
 SELECT * FROM user WHERE id BETWEEN 10 AND 30 FOR UPDATE;
 
 ```
 
-이 경우 (10, 30] 범위에 잠금이 걸림.
-
-id = 25 삽입 불가
-
-### 여기서 의문?
-
-```sql
--- 트랜잭션 1
-START TRANSACTION;
-SELECT * FROM user WHERE id = 20 FOR UPDATE;
-
--- 트랜잭션 2
-INSERT INTO user values(25, "D");
-COMMIT;
-
--- 트랜잭션 1
-SELECT * FROM user WHERE id >= 20;
-
-```
-
-`두 개가 보일까?`
-
-⇒ ㄴㄴ id = 20만 보임
-
-트랜잭션이 시작되는 시점의 스냅샷을 기준으로 모든 쿼리를 처리하기 때문(MVCC 활용)
-
-`그렇다면 갭 락이 필요 없는 것이 아닐까?`
-
-⇒ ㄴㄴ MVCC는 트랜잭션 1에서 id=25인 row를 보이지 않게 해 줄 뿐 실제 삽입은 막지 못함.
-
-따라서 트랜잭션 1에서
-
-```sql
-UPDATE user SET ... WHERE id >= 20;
-
-```
-
-를 수행하면, 트랜잭션 1에서 보지 못한 id=25 인 row 까지 수정될 수 있음.
-
-이것은 트랜잭션 1의 의도가 아닐 수 있기 때문에 갭 락이 필요한 것.
-
-`그럼 SELECT * FROM user WHERE id = 20 FOR UPDATE; 에서 id=20인 레코드만 잠그는 것이 아니라 (10, 20] 을 잠그는 이유는 무엇인가?`
-
-InnoDB의 보수적 락 전략
-
-개발자가 이후에 어떤 쿼리를 실행할 지 모르기 때문에
-
-id = 20 만 락을 걸었다가 id ≤ 20 또는 BETWEEN 10 AND 20 같은 범위 쿼리를 날리면 팬텀 리드가 발생할 수 있기 때문에 
-
-`그럼 (20,30]은 왜 안잠그냐?`
-
-⇒ 30까지 탐색을 안했음.
-
-id = 20 FOR UPDATE; 라고 했으니까
-
-(prev_key, key] 까지만 잠금.
-
-`논리적으로 불완전하지 않나?` 
-
-⇒ 맞긴 함. BUT 동시성/안전성의 절충 설계임.
-
-`id = 10, 20, 30 만 있는 테이블에서 SELECT * FROM user WHERE id BETWEEN 15 AND 17 FOR UPDATE; 를 수행하면 어디에 락이 걸리나?`
-
-⇒ (10, 20]에 걸림.
-
-`id BETWEEN 19 AND 21 FOR UPDATE; 는?`
-
-⇒ (10, 20] + (20, 30] 에 걸림.
+획득 락 → 레코드 락(10·20·30) + 갭 락 (‑∞,10], (10,20], (20,30]
+허용 행위 → 다른 세션은 id = 35 삽입 가능, 15·25 삽입은 대기/차단
+   
 
 ### 자동 증가 락
 
@@ -308,8 +249,8 @@ AUTO_INCREMENT 락은 테이블에 하나만 존재하기 때문에 두 개의 I
 | Read Uncommitted | ❌ 발생함 | ❌ 발생함 | ❌ 발생함 | 아무런 차단 안 함. 모든 트랜잭션 변화가 즉시 보임 |
 | Read Committed | ✅ 차단 | ❌ 발생함 | ❌ 발생함 | MVCC로 커밋된 데이터만 보여줌 |
 | Repeatable Read | ✅ 차단 | ✅ 차단 | ❌ 발생함 | MVCC로 같은 스냅샷 유지. 팬텀은 갭 락 없으면 발생 |
-| Repeatable Read<br>+ Next-Key Lock | ✅ 차단 | ✅ 차단 | ✅ 차단 | MVCC + 갭 락(넥스트 키 락)으로 팬텀 리드 차단 |
-| Serializable | ✅ 차단 | ✅ 차단 | ✅ 차단 | 모든 SELECT도 암묵적으로 공유락 (Range Lock) 적용 |
+| Repeatable Read<br>+ Next-Key Lock | ✅ 차단 | ✅ 차단 | (단순 SELECT 기준) 발생 가능<br/>(락킹 읽기) 차단 | InnoDB Repeatable Read는 락킹 읽기(SELECT … FOR UPDATE/LOCK IN SHARE MODE) 에 대해 넥스트 키 락으로 팬텀을 차단한다. 단순 SELECT에서는 팬텀 발생 가능. |
+| Serializable | ✅ 차단 | ✅ 차단 | ✅ 차단 | 모든 SELECT에 범위 또는 레코드 락 부여 |
 - Dirty Read: 다른 트랜잭션이 커밋하지 않은 데이터가 보이는 현상
 - Non-Repeatable Read: 같은 쿼리를 두 번 했을 때 값이 달라지는 현상(다른 트랜잭션이UPDATE/DELETE)
 - Phantom Read: 같은 조건의 쿼리를 반복했을 때 처음에 없던 레코드가 생기는 현상(다른 트랜잭션이 INSERT)
