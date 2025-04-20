@@ -212,6 +212,7 @@ SELECT * FROM user WHERE id = 20 FOR UPDATE;
 ```
 
 획득 락 → 레코드 락(id = 20)
+
 허용 행위 → 다른 세션은 id = 15·25 삽입 모두 가능
 
 2. 범위 검색
@@ -221,6 +222,7 @@ SELECT * FROM user WHERE id BETWEEN 10 AND 30 FOR UPDATE;
 ```
 
 획득 락 → 레코드 락(10·20·30) + 갭 락 (‑∞,10], (10,20], (20,30]
+
 허용 행위 → 다른 세션은 id = 35 삽입 가능, 15·25 삽입은 대기/차단
    
 
