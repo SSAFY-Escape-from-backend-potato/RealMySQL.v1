@@ -62,13 +62,13 @@ A.
 
 - dirty read
   : commit되지 않은 레코드 값을 읽어 일어날 수 있는 이상현상
-  ![image.png](Review - Transaction, Index\image(1).png)
+  ![image.png](<images\image(1).png>)
 - non-repeatable read (fuzzy read)
   : 하나의 트랜잭션에서 같은 데이터를 두 번 읽었는데 값이 달라지는 이상현상
-  ![image.png](Review - Transaction, Index\image(2).png)
+  ![image.png](<images\image(2).png>)
 - phantom read
   : 하나의 트랜잭션에서 같은 조건으로 데이터를 두 번 읽었는데 없던 데이터가 생기는 이상현상
-  ![image.png](Review - Transaction, Index\image(3).png)
+  ![image.png](<images\image(3).png>)
 
 | Isolation Level  | Dirty Read | Non-Repeatable Read | Phantom Read |
 | ---------------- | ---------- | ------------------- | ------------ |
