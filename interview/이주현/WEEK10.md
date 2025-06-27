@@ -64,16 +64,16 @@ InnoDB는 기본적으로 REPEATABLE READ이며, MVCC를 통해 Phantom Read도 
 
 InnoDB는 ACID 보장을 위해 다음 메커니즘을 사용합니다:  
 
-	1.	Atomicity (원자성): 트랜잭션 실행은 모두 완료되거나 실패 시 롤백되어야 한다 
+	1. Atomicity (원자성): 트랜잭션 실행은 모두 완료되거나 실패 시 롤백되어야 한다 
 	    Undo 로그를 사용하여 트랜잭션 실패 시 롤백 가능  
 
-	2.	Consistency (일관성): 트랜잭션 수행 후 데이터베이스의 상태는 유효해야 한다.
+	2. Consistency (일관성): 트랜잭션 수행 후 데이터베이스의 상태는 유효해야 한다.
 	    FK 제약, 트랜잭션 내 무결성 체크 등을 통해 보장  
 
-	3.	Isolation (격리성): 각각의 트랜잭션은 다른 트랜잭션에 영향을 주면 안된다.
+	3. Isolation (격리성): 각각의 트랜잭션은 다른 트랜잭션에 영향을 주면 안된다.
 	    트랜잭션 격리 수준 + MVCC로 구현
 
-	4.	Durability (지속성): 트랜잭션 결과는 디스크에 반영되어야 한다. + 장애 대응
+	4. Durability (지속성): 트랜잭션 결과는 디스크에 반영되어야 한다. + 장애 대응
 	    Redo 로그 + 디스크 플러시(fsync)로 커밋된 변경을 디스크에 반영
 
 InnoDB는 Doublewrite Buffer, Redo Log, Undo Log, Flush 정책 등을 조합하여 ACID를 보장합니다.
