@@ -5,8 +5,9 @@
 B-Tree 인덱스는 범위 검색과 정렬에 유리한 반면, Hash 인덱스는 동등 비교(=)에만 최적화되어 있습니다.
 MySQL의 대표 엔진인 InnoDB는 기본적으로 B+Tree 기반 인덱스를 사용합니다.
 Hash 인덱스는 MEMORY 엔진에서 사용되며, 인덱스 컬럼을 해시 함수로 변환하여 값을 찾기 때문에 매우 빠르지만, 범위 조건, LIKE, ORDER BY, IN 등에는 사용할 수 없습니다.
-	•	B-Tree: WHERE age BETWEEN 20 AND 30, ORDER BY name
-	•	Hash: WHERE id = 123
+
+• B-Tree: WHERE age BETWEEN 20 AND 30, ORDER BY name  
+• Hash: WHERE id = 123
 
 <br>
 
@@ -32,12 +33,14 @@ Hash 인덱스는 MEMORY 엔진에서 사용되며, 인덱스 컬럼을 해시 �
 
 InnoDB는 기본 키를 기준으로 정렬된 B+Tree 구조인 클러스터형 인덱스(Clustered Index)를 사용합니다.  
 테이블의 데이터 자체가 인덱스의 leaf 노드에 저장되기 때문에, 보조 인덱스(Secondary Index)는 실제 데이터 주소가 아니라 클러스터 인덱스의 키를 저장합니다.  
+
 ### 장점:
-• 기본 키 순으로 데이터가 정렬되어 있어 범위 검색이 빠름
-• 기본 키 기반 검색 시 추가 접근 없이 데이터 조회 가능
+• 기본 키 순으로 데이터가 정렬되어 있어 범위 검색이 빠름  
+• 기본 키 기반 검색 시 추가 접근 없이 데이터 조회 가능  
+
 ### 단점:
-• 기본 키가 너무 길면 보조 인덱스가 비대해져 성능 저하
-• 기본 키 변경 시 전체 데이터 재정렬 필요 → 비용 큼
+• 기본 키가 너무 길면 보조 인덱스가 비대해져 성능 저하  
+• 기본 키 변경 시 전체 데이터 재정렬 필요 → 비용 큼  
 
 <br>
 
@@ -54,7 +57,7 @@ InnoDB는 기본 키를 기준으로 정렬된 B+Tree 구조인 클러스터형 
 | REPEATABLE READ   | Phantom Read *(InnoDB는 방지)* | 범위 쿼리에서 결과 행 수가 달라짐     |
 | SERIALIZABLE      | 없음                      | 가장 강력한 격리 수준, 동시성 낮음       |
 
-InnoDB는 기본적으로 REPEATABLE READ이며, MVCC를 통해 Phantom Read도 방지합니다.
+InnoDB는 기본적으로 REPEATABLE READ이며, MVCC를 통해 Phantom Read도 방지합니다.  
 하지만 SELECT ... FOR UPDATE 같은 명시적 잠금이 없으면 동시성 문제가 발생할 수 있습니다.
 
 <br>
